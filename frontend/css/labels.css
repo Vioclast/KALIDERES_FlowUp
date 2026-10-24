@@ -1,0 +1,188 @@
+/* ---------- Section heading and buttons ---------- */
+
+.section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 3rem 0 1.25rem;
+}
+
+.section-head h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.6rem;
+  letter-spacing: -0.015em;
+}
+
+.button {
+  padding: 0.65rem 1.15rem;
+  border: 1.5px solid var(--ink);
+  border-radius: 6px;
+  background: var(--ink);
+  color: var(--label);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.button:hover:not(:disabled) {
+  background: #2a3a5e;
+}
+
+.button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.button--quiet {
+  background: transparent;
+  color: var(--ink);
+}
+
+.button--quiet:hover:not(:disabled) {
+  background: var(--label);
+}
+
+/* ---------- Messages ---------- */
+
+.flash {
+  margin: 0 0 1rem;
+  font-weight: 700;
+}
+
+.flash--ok {
+  color: var(--pandan);
+}
+
+.flash--error {
+  color: var(--chili);
+}
+
+.notice--calm {
+  border-left-color: var(--pandan);
+}
+
+/* ---------- Shelf-edge labels ---------- */
+
+.tags {
+  display: grid;
+  gap: 0.9rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tag {
+  display: grid;
+  grid-template-columns: 0.6rem 1fr auto;
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--label);
+}
+
+.tag__band {
+  background: var(--ink);
+}
+
+.tag--urgent .tag__band {
+  background: var(--chili);
+}
+
+.tag--discount .tag__band {
+  background: var(--yolk);
+}
+
+.tag--review .tag__band {
+  background: repeating-linear-gradient(135deg, var(--ink-soft) 0 6px, var(--label) 6px 12px);
+}
+
+.tag__body {
+  padding: 1rem 1.25rem;
+}
+
+.tag__name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.35rem;
+  letter-spacing: -0.01em;
+}
+
+.tag__flag {
+  margin-left: 0.6rem;
+  padding: 0.1rem 0.55rem;
+  border-radius: 999px;
+  background: var(--chili);
+  color: var(--label);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  vertical-align: middle;
+}
+
+.tag__action {
+  margin: 0.1rem 0 0.5rem;
+  font-weight: 700;
+}
+
+.tag__reason {
+  max-width: 60ch;
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+.tag__money {
+  margin: 0.6rem 0 0;
+  font-size: 0.95rem;
+}
+
+/* The tear-off part of the label, like a price tag */
+.tag__figure {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  min-width: 8rem;
+  padding: 0.75rem 1.25rem;
+  border-left: 1.5px dashed var(--line);
+  text-align: center;
+}
+
+.tag__number {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 3rem;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.tag__caption {
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 36rem) {
+  .tag {
+    grid-template-columns: 0.6rem 1fr;
+  }
+
+  .tag__figure {
+    grid-column: 2;
+    grid-auto-flow: column;
+    justify-content: start;
+    align-items: baseline;
+    gap: 0.6rem;
+    padding: 0.6rem 1.25rem;
+    border-top: 1.5px dashed var(--line);
+    border-left: 0;
+    text-align: left;
+  }
+
+  .tag__number {
+    font-size: 2rem;
+  }
+}

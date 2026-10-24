@@ -11,10 +11,15 @@ const money = new Intl.NumberFormat("en-MY", { style: "currency", currency: "MYR
 const state = {
   users: [],
   currentUser: null,
+  flash: null, // A short message shown once after an action, for example { kind: "ok", text: "..." }
 };
 
 const switcherEl = document.getElementById("user-switcher");
 const appEl = document.getElementById("app");
+
+function pluralize(count, word) {
+  return `${count} ${word}${count === 1 ? "" : "s"}`;
+}
 
 /** Remember which user was selected, even after the page is reloaded. */
 function loadSavedUserId() {
@@ -34,7 +39,7 @@ function saveUserId(id) {
 }
 
 /** Call the backend. Every request carries the id of the user who is signed in. */
-async function api(path) {
+async function api(path, options = {}) {
   const headers = {};
   if (state.currentUser) {
     headers["x-user-id"] = String(state.currentUser.id);
@@ -42,7 +47,7 @@ async function api(path) {
 
   let response;
   try {
-    response = await fetch(path, { headers });
+    response = await fetch(path, { ...options, headers });
   } catch (error) {
     throw new Error("Cannot reach the FlowUp server. Check that it is running.");
   }
@@ -122,7 +127,7 @@ function createFigure(label, value) {
   return wrapper;
 }
 
-function renderBriefing(summary) {
+function renderBriefing(summary, suggestions) {
   appEl.innerHTML = "";
 
   const waiting = summary.pending_recommendations;
@@ -150,14 +155,17 @@ function renderBriefing(summary) {
     );
   }
 
-  appEl.append(verdict, figures);
+  appEl.append(verdict, figures, renderSuggestionsSection(suggestions));
 }
 
 async function loadBriefing() {
   appEl.innerHTML = '<p class="status">Loading the shop briefing...</p>';
   try {
-    const summary = await api("/dashboard/summary");
-    renderBriefing(summary);
+    const [summary, suggestions] = await Promise.all([
+      api("/dashboard/summary"),
+      api("/recommendations?status=pending"),
+    ]);
+    renderBriefing(summary, suggestions);
   } catch (error) {
     renderError(error);
   }
@@ -165,6 +173,7 @@ async function loadBriefing() {
 
 function switchUser(user) {
   state.currentUser = user;
+  state.flash = null;
   saveUserId(user.id);
   renderSwitcher();
   loadBriefing();
