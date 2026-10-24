@@ -1,0 +1,19 @@
+# Python cache files
+__pycache__/
+*.pyc
+
+# Virtual environment (each person creates their own)
+.venv/
+venv/
+
+# Secret settings (API keys, passwords)
+.env
+
+# Local database files (created again by the seed script)
+*.db
+*.sqlite3
+
+# Editor and system files
+.vscode/
+.DS_Store
+Thumbs.db
