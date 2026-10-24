@@ -11,14 +11,28 @@ const money = new Intl.NumberFormat("en-MY", { style: "currency", currency: "MYR
 const state = {
   users: [],
   currentUser: null,
-  flash: null, // A short message shown once after an action, for example { kind: "ok", text: "..." }
 };
 
 const switcherEl = document.getElementById("user-switcher");
 const appEl = document.getElementById("app");
 
+let toastTimer = null;
+
 function pluralize(count, word) {
   return `${count} ${word}${count === 1 ? "" : "s"}`;
+}
+
+/** Show a short message at the bottom of the screen after the user did something. */
+function showToast(kind, text) {
+  const toast = document.getElementById("toast");
+  toast.className = `toast toast--${kind}`;
+  toast.textContent = text;
+  toast.hidden = false;
+
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    toast.hidden = true;
+  }, 8000);
 }
 
 /** Remember which user was selected, even after the page is reloaded. */
@@ -38,16 +52,25 @@ function saveUserId(id) {
   }
 }
 
-/** Call the backend. Every request carries the id of the user who is signed in. */
+/**
+ * Call the backend. Every request carries the id of the user who is signed in.
+ * Pass { json: {...} } to send data in the request body.
+ */
 async function api(path, options = {}) {
+  const { json, ...fetchOptions } = options;
+
   const headers = {};
   if (state.currentUser) {
     headers["x-user-id"] = String(state.currentUser.id);
   }
+  if (json !== undefined) {
+    headers["Content-Type"] = "application/json";
+    fetchOptions.body = JSON.stringify(json);
+  }
 
   let response;
   try {
-    response = await fetch(path, { ...options, headers });
+    response = await fetch(path, { ...fetchOptions, headers });
   } catch (error) {
     throw new Error("Cannot reach the FlowUp server. Check that it is running.");
   }
@@ -158,8 +181,12 @@ function renderBriefing(summary, suggestions) {
   appEl.append(verdict, figures, renderSuggestionsSection(suggestions));
 }
 
-async function loadBriefing() {
-  appEl.innerHTML = '<p class="status">Loading the shop briefing...</p>';
+/** Load the briefing. With { quiet: true } the page is refreshed without a loading message. */
+async function loadBriefing({ quiet = false } = {}) {
+  if (!quiet) {
+    appEl.innerHTML = '<p class="status">Loading the shop briefing...</p>';
+  }
+
   try {
     const [summary, suggestions] = await Promise.all([
       api("/dashboard/summary"),
@@ -173,7 +200,6 @@ async function loadBriefing() {
 
 function switchUser(user) {
   state.currentUser = user;
-  state.flash = null;
   saveUserId(user.id);
   renderSwitcher();
   loadBriefing();

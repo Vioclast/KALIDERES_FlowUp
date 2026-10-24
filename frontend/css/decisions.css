@@ -1,0 +1,74 @@
+/* ---------- Buttons inside a label ---------- */
+
+.tag__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+
+.tag__actions .button {
+  padding: 0.5rem 0.95rem;
+}
+
+.tag__quantity {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+}
+
+.tag__quantity input {
+  width: 5.5rem;
+  padding: 0.45rem 0.6rem;
+  border: 1.5px solid var(--ink-soft);
+  border-radius: 6px;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+}
+
+.tag__hint {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+}
+
+/* ---------- Toast: a short message after the user did something ---------- */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 1.5rem;
+  z-index: 10;
+  max-width: min(36rem, calc(100vw - 2rem));
+  padding: 0.85rem 1.25rem;
+  border-radius: 6px;
+  background: var(--ink);
+  color: var(--label);
+  font-weight: 700;
+  transform: translateX(-50%);
+  animation: toast-in 0.2s ease-out;
+}
+
+.toast--error {
+  background: var(--chili);
+}
+
+.toast[hidden] {
+  display: none;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 0.75rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    animation: none;
+  }
+}

@@ -43,6 +43,116 @@ function tagMoneyNote(suggestion) {
   return "";
 }
 
+function approveLabel(suggestion) {
+  if (suggestion.action === "discount") {
+    return "Approve discount";
+  }
+  if (suggestion.action === "reorder") {
+    return "Approve order";
+  }
+  return "Place order";
+}
+
+/** The message shown after the owner decided. It uses the same words as the buttons. */
+function decisionMessage(suggestion, decision, payload) {
+  const name = suggestion.product_name;
+
+  if (decision === "reject") {
+    const verb = suggestion.action === "needs_review" ? "Dismissed" : "Rejected";
+    return `${verb}: ${name}. It may be suggested again at the next stock check.`;
+  }
+  if (suggestion.action === "discount") {
+    return `Approved: ${suggestion.discount_percent}% discount applied to ${name}.`;
+  }
+  const quantity = payload ? payload.quantity : suggestion.suggested_quantity;
+  return `Approved: order placed for ${quantity} units of ${name}.`;
+}
+
+function setBusy(actionsEl, busy) {
+  for (const button of actionsEl.querySelectorAll("button")) {
+    button.disabled = busy;
+  }
+}
+
+/** Human approval: send the owner's decision to the server, then refresh the page. */
+async function decide(suggestion, decision, actionsEl, quantityInput) {
+  let options = { method: "POST" };
+
+  if (decision === "approve" && quantityInput !== null) {
+    const quantity = Number(quantityInput.value);
+    if (!Number.isInteger(quantity) || quantity < 1) {
+      showToast("error", "Enter how many units to order, for example 24.");
+      quantityInput.focus();
+      return;
+    }
+    options = { method: "POST", json: { quantity } };
+  }
+
+  setBusy(actionsEl, true);
+  try {
+    await api(`/recommendations/${suggestion.id}/${decision}`, options);
+    showToast("ok", decisionMessage(suggestion, decision, options.json));
+  } catch (error) {
+    showToast("error", error.message);
+  }
+
+  loadBriefing({ quiet: true });
+}
+
+/** The buttons at the bottom of a label. Only the owner gets them. */
+function createActions(suggestion) {
+  const actions = document.createElement("div");
+  actions.className = "tag__actions";
+
+  if (state.currentUser.role !== "owner") {
+    const hint = document.createElement("p");
+    hint.className = "tag__hint";
+    hint.textContent = "Only the owner can approve or reject.";
+    actions.append(hint);
+    return actions;
+  }
+
+  const isReview = suggestion.action === "needs_review";
+  const needsQuantity = isReview && suggestion.batch_id === null;
+  const canApprove = !isReview || needsQuantity;
+
+  let quantityInput = null;
+  if (needsQuantity) {
+    const field = document.createElement("label");
+    field.className = "tag__quantity";
+    field.append("Units to order");
+
+    quantityInput = document.createElement("input");
+    quantityInput.type = "number";
+    quantityInput.min = "1";
+    quantityInput.step = "1";
+    quantityInput.inputMode = "numeric";
+
+    field.append(quantityInput);
+    actions.append(field);
+  }
+
+  if (canApprove) {
+    const approve = document.createElement("button");
+    approve.type = "button";
+    approve.className = "button";
+    approve.textContent = approveLabel(suggestion);
+    approve.addEventListener("click", () =>
+      decide(suggestion, "approve", actions, quantityInput),
+    );
+    actions.append(approve);
+  }
+
+  const reject = document.createElement("button");
+  reject.type = "button";
+  reject.className = "button button--quiet";
+  reject.textContent = isReview ? "Dismiss" : "Reject";
+  reject.addEventListener("click", () => decide(suggestion, "reject", actions, null));
+  actions.append(reject);
+
+  return actions;
+}
+
 function createTag(suggestion) {
   const tag = document.createElement("li");
   tag.className = `tag ${tagVariant(suggestion)}`;
@@ -76,11 +186,13 @@ function createTag(suggestion) {
 
   const moneyNote = tagMoneyNote(suggestion);
   if (moneyNote) {
-    const money = document.createElement("p");
-    money.className = "tag__money";
-    money.textContent = moneyNote;
-    body.append(money);
+    const note = document.createElement("p");
+    note.className = "tag__money";
+    note.textContent = moneyNote;
+    body.append(note);
   }
+
+  body.append(createActions(suggestion));
 
   const figure = tagFigure(suggestion);
   const figureEl = document.createElement("div");
@@ -120,15 +232,6 @@ function renderSuggestionsSection(suggestions) {
   head.append(title, runButton);
   section.appendChild(head);
 
-  if (state.flash) {
-    const flash = document.createElement("p");
-    flash.className = `flash flash--${state.flash.kind}`;
-    flash.setAttribute("role", state.flash.kind === "error" ? "alert" : "status");
-    flash.textContent = state.flash.text;
-    section.appendChild(flash);
-    state.flash = null;
-  }
-
   if (suggestions.length === 0) {
     const empty = document.createElement("div");
     empty.className = "notice notice--calm";
@@ -164,10 +267,10 @@ async function runStockCheck(button) {
       created.length === 0
         ? "Stock check finished. Nothing new to suggest."
         : `Stock check finished. ${pluralize(created.length, "new suggestion")} added.`;
-    state.flash = { kind: "ok", text };
+    showToast("ok", text);
   } catch (error) {
-    state.flash = { kind: "error", text: error.message };
+    showToast("error", error.message);
   }
 
-  loadBriefing();
+  loadBriefing({ quiet: true });
 }
