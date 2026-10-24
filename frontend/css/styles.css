@@ -1,0 +1,228 @@
+:root {
+  --paper: #E3ECE8;   /* Jade-grey page, like old kopitiam floor tiles */
+  --label: #FFFFFF;   /* White shelf labels */
+  --ink: #16223B;     /* Deep blue for text and main buttons */
+  --ink-soft: #4B5870;
+  --chili: #D8392B;   /* Urgent: stock will run out before delivery */
+  --yolk: #F0B429;    /* Warning: batch expires soon */
+  --pandan: #1F8A5B;  /* Healthy or approved */
+  --line: #B9CAC3;
+  --font-display: "Bricolage Grotesque", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 1.0625rem;
+  line-height: 1.55;
+}
+
+:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 2px;
+}
+
+/* ---------- Top bar ---------- */
+
+.topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 2rem;
+  padding: 0.9rem clamp(1rem, 4vw, 2.5rem);
+  border-bottom: 1.5px solid var(--ink);
+}
+
+.wordmark {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.7rem;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.main-nav {
+  display: flex;
+  gap: 0.25rem;
+  margin-right: auto;
+}
+
+.main-nav a {
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  color: var(--ink-soft);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.main-nav a:hover {
+  color: var(--ink);
+}
+
+.main-nav a[aria-current="page"] {
+  color: var(--ink);
+  background: var(--label);
+}
+
+/* ---------- Name tags (role switcher) ---------- */
+
+.nametag-area {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.nametag-caption {
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+}
+
+.user-switcher {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.nametag {
+  position: relative;
+  display: grid;
+  padding: 0.4rem 0.9rem 0.4rem 1.7rem;
+  border: 1.5px solid var(--line);
+  border-radius: 4px 14px 14px 4px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  line-height: 1.25;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+
+/* The punched hole of a staff name tag */
+.nametag::before {
+  content: "";
+  position: absolute;
+  left: 0.6rem;
+  top: 50%;
+  width: 0.55rem;
+  height: 0.55rem;
+  margin-top: -0.275rem;
+  border: 1.5px solid var(--ink-soft);
+  border-radius: 50%;
+}
+
+.nametag:hover {
+  border-color: var(--ink-soft);
+}
+
+.nametag[aria-pressed="true"] {
+  background: var(--label);
+  border-color: var(--ink);
+}
+
+.nametag[aria-pressed="true"]::before {
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+.nametag-name {
+  font-weight: 700;
+}
+
+.nametag-role {
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+}
+
+/* ---------- Page content ---------- */
+
+.page {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: clamp(1.5rem, 5vw, 3.5rem) clamp(1rem, 4vw, 2.5rem);
+}
+
+.verdict {
+  max-width: 22ch;
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+}
+
+.figures {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 2.25rem 0 0;
+  padding: 0;
+  border-top: 1.5px solid var(--ink);
+}
+
+.figure {
+  flex: 1 1 12rem;
+  padding: 1rem 1.25rem 1rem 0;
+}
+
+.figure dt {
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+}
+
+.figure dd {
+  margin: 0.15rem 0 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 2rem;
+  letter-spacing: -0.02em;
+}
+
+.status {
+  color: var(--ink-soft);
+}
+
+.notice {
+  max-width: 36rem;
+  padding: 1rem 1.25rem;
+  background: var(--label);
+  border-left: 6px solid var(--chili);
+}
+
+.notice strong {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+}
+
+.notice p {
+  margin: 0.4rem 0 0;
+  color: var(--ink-soft);
+}
+
+/* ---------- Small screens ---------- */
+
+@media (max-width: 40rem) {
+  .nametag-caption {
+    display: none;
+  }
+
+  .main-nav {
+    order: 3;
+    width: 100%;
+    overflow-x: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}
