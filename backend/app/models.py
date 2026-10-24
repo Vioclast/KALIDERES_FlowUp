@@ -1,6 +1,7 @@
-from datetime import date
+from datetime import date, datetime
 from typing import Optional
 
+from pydantic import NaiveDatetime
 from sqlmodel import Field, SQLModel
 
 
@@ -51,3 +52,53 @@ class DailySale(SQLModel, table=True):
     product_id: int = Field(foreign_key="product.id")
     sale_date: date
     quantity_sold: int
+
+
+class Recommendation(SQLModel, table=True):
+    """A suggested action saved for a person to approve or reject."""
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    product_id: int = Field(foreign_key="product.id")
+    product_name: str  # Copied here so the list is easy to read
+    action: str  # "reorder", "discount" or "needs_review"
+    priority: str  # "high" or "normal"
+    reason: str
+    suggested_quantity: Optional[int] = None
+    discount_percent: Optional[int] = None
+    batch_id: Optional[int] = Field(default=None, foreign_key="stockbatch.id")
+    estimated_amount: Optional[float] = None
+    status: str = "pending"  # "pending", "approved" or "rejected"
+    created_at: NaiveDatetime = Field(default_factory=datetime.now)  # FIX
+    decided_by_user_id: Optional[int] = Field(default=None, foreign_key="user.id")
+    decided_at: Optional[NaiveDatetime] = None  # FIX
+
+
+class ActivityLog(SQLModel, table=True):
+    """One line of the audit trail: who did what, and when."""
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    timestamp: NaiveDatetime = Field(default_factory=datetime.now)  # FIX
+    user_id: int = Field(foreign_key="user.id")
+    user_name: str  # Copied here so old records keep the name used at that time
+    role: str
+    action: str  # For example "stock_check_run"
+    details: str
+
+
+class PurchaseOrder(SQLModel, table=True):
+    """An order to a supplier, created after the owner approved a reorder.
+
+    Its total cost is the expense record for that order.
+    """
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    recommendation_id: int = Field(foreign_key="recommendation.id")
+    product_id: int = Field(foreign_key="product.id")
+    product_name: str
+    supplier_id: int = Field(foreign_key="supplier.id")
+    supplier_name: str
+    quantity: int
+    total_cost: float  # Quantity x unit cost (RM)
+    status: str = "placed"  # "placed" now, "received" in a later version
+    created_at: NaiveDatetime = Field(default_factory=datetime.now)  # FIX
+    approved_by_user_id: int = Field(foreign_key="user.id")
