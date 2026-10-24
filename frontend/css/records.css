@@ -1,0 +1,164 @@
+/* ---------- Active link in the main navigation ---------- */
+
+.main-nav a[aria-current="page"] {
+  background: var(--label);
+  color: var(--ink);
+  font-weight: 700;
+}
+
+/* ---------- Shared bits for the Orders and Activity pages ---------- */
+
+.page-note {
+  margin: 0 0 1.25rem;
+  color: var(--ink-soft);
+}
+
+.chip {
+  display: inline-block;
+  padding: 0.1rem 0.6rem;
+  border: 1.5px solid var(--pandan, #1F8A5B);
+  border-radius: 999px;
+  color: var(--ink);
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+/* ---------- Orders: each order looks like a delivery slip ---------- */
+
+.slips {
+  display: grid;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.slip {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: var(--label);
+  border-top: 2px dashed var(--line, #B9CAC3);
+  border-bottom: 2px dashed var(--line, #B9CAC3);
+}
+
+.slip__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.slip__name {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.slip__line {
+  margin: 0.35rem 0 0;
+  font-weight: 700;
+}
+
+.slip__meta {
+  margin: 0.25rem 0 0;
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+}
+
+.slip__cost {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  text-align: right;
+}
+
+.slip__amount {
+  font-family: "Bricolage Grotesque", "Atkinson Hyperlegible", sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.slip__caption {
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+}
+
+/* ---------- Activity: a timeline, newest first ---------- */
+
+.timeline {
+  margin: 0 0 0 0.5rem;
+  padding: 0;
+  list-style: none;
+  border-left: 2px solid var(--line, #B9CAC3);
+}
+
+.entry {
+  position: relative;
+  padding: 0 0 1.25rem 1.5rem;
+}
+
+.entry:last-child {
+  padding-bottom: 0;
+}
+
+.entry::before {
+  content: "";
+  position: absolute;
+  top: 0.15rem;
+  left: calc(-0.5rem - 1px);
+  box-sizing: border-box;
+  width: 1rem;
+  height: 1rem;
+  border: 3px solid var(--paper);
+  border-radius: 50%;
+  background: var(--ink-soft);
+}
+
+.entry--approved::before {
+  background: var(--pandan, #1F8A5B);
+}
+
+.entry--rejected::before {
+  background: var(--chili);
+}
+
+.entry__time {
+  margin: 0 0 0.35rem;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+}
+
+.entry__card {
+  padding: 0.8rem 1rem;
+  background: var(--label);
+}
+
+.entry__action {
+  margin: 0;
+  font-weight: 700;
+}
+
+.entry__who {
+  margin: 0.15rem 0 0;
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+}
+
+.entry__details {
+  margin: 0.5rem 0 0;
+}
+
+@media (max-width: 34rem) {
+  .slip {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .slip__cost {
+    align-items: flex-start;
+    text-align: left;
+  }
+}

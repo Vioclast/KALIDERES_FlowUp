@@ -18,6 +18,14 @@ const appEl = document.getElementById("app");
 
 let toastTimer = null;
 
+/** The pages of the app. The address in the browser (for example #orders) picks one. */
+const ROUTES = {
+  briefing: () => loadBriefing(),
+  stock: () => renderStockSoon(),
+  orders: () => loadOrders(),
+  activity: () => loadActivity(),
+};
+
 function pluralize(count, word) {
   return `${count} ${word}${count === 1 ? "" : "s"}`;
 }
@@ -93,6 +101,36 @@ async function api(path, options = {}) {
   return response.json();
 }
 
+/** Which page the address in the browser asks for. Unknown addresses open the briefing. */
+function getRoute() {
+  const name = window.location.hash.replace("#", "");
+  return Object.hasOwn(ROUTES, name) ? name : "briefing";
+}
+
+/** True while the page the user asked for is still the one that should be on screen. */
+function stillOn(route, user) {
+  return getRoute() === route && state.currentUser === user;
+}
+
+function markActiveNav(route) {
+  for (const link of document.querySelectorAll(".main-nav a")) {
+    if (link.getAttribute("href") === `#${route}`) {
+      link.setAttribute("aria-current", "page");
+    } else {
+      link.removeAttribute("aria-current");
+    }
+  }
+}
+
+function showCurrentPage() {
+  if (state.currentUser === null) {
+    return;
+  }
+  const route = getRoute();
+  markActiveNav(route);
+  ROUTES[route]();
+}
+
 function renderSwitcher() {
   switcherEl.innerHTML = "";
 
@@ -127,7 +165,7 @@ function renderError(error) {
   title.textContent =
     error.status === 403
       ? "This page is not available for your role."
-      : "The briefing could not be loaded.";
+      : "This page could not be loaded.";
 
   const detail = document.createElement("p");
   detail.textContent = error.message;
@@ -183,6 +221,8 @@ function renderBriefing(summary, suggestions) {
 
 /** Load the briefing. With { quiet: true } the page is refreshed without a loading message. */
 async function loadBriefing({ quiet = false } = {}) {
+  const user = state.currentUser;
+
   if (!quiet) {
     appEl.innerHTML = '<p class="status">Loading the shop briefing...</p>';
   }
@@ -192,8 +232,14 @@ async function loadBriefing({ quiet = false } = {}) {
       api("/dashboard/summary"),
       api("/recommendations?status=pending"),
     ]);
+    if (!stillOn("briefing", user)) {
+      return;
+    }
     renderBriefing(summary, suggestions);
   } catch (error) {
+    if (!stillOn("briefing", user)) {
+      return;
+    }
     renderError(error);
   }
 }
@@ -202,7 +248,7 @@ function switchUser(user) {
   state.currentUser = user;
   saveUserId(user.id);
   renderSwitcher();
-  loadBriefing();
+  showCurrentPage();
 }
 
 async function init() {
@@ -225,7 +271,12 @@ async function init() {
     state.users[0];
 
   renderSwitcher();
-  loadBriefing();
+  showCurrentPage();
 }
+
+window.addEventListener("hashchange", () => {
+  window.scrollTo(0, 0);
+  showCurrentPage();
+});
 
 init();
